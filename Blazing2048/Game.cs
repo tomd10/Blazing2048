@@ -1,5 +1,9 @@
 ﻿namespace Blazing2048
 {
+    public enum Direction
+    {
+        Up, Down, Left, Right
+    }
     public abstract class Game
     {
         protected Random rnd = new Random();
@@ -68,6 +72,193 @@
                 }
             }
             return false;
+        }
+
+        public bool CheckForLose()
+        {
+            return !Move(Direction.Left, false) && !Move(Direction.Right, false)
+                && !Move(Direction.Up, false) && !Move(Direction.Down, false);
+            ;
+        }
+        public bool Move(Direction dir, bool perform)
+        {
+            //Deep gameBoard copy
+            int[,] gameBoardCopy = new int[dimX, dimY];
+            Array.Copy(gameBoard, gameBoardCopy, dimX * dimY);
+
+
+
+            if (dir == Direction.Up || dir == Direction.Down)
+            {
+                //Get columns
+                for (int colNumber = 0; colNumber < dimY; colNumber++)
+                {
+                    List<int> column = new List<int>();
+                    for (int rowNumber = 0; rowNumber < dimX; rowNumber++)
+                    {
+                        column.Add(gameBoardCopy[rowNumber, colNumber]);
+                    }
+
+                    column = AuxMethods.RemoveZeroes(column);
+                    if (column.Count > 1)
+                    {
+                        if (dir == Direction.Up)
+                        {
+                            //Add tiles together
+                            for (int i = 0; i < column.Count - 1;)
+                            {
+                                if (column[i] == column[i + 1])
+                                {
+                                    column[i] = column[i] + column[i + 1];
+                                    if (perform) score = score + column[i];
+                                    column[i + 1] = 0;
+                                    i = i + 2;
+                                }
+                                else
+                                {
+                                    i = i + 1;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int i = column.Count - 1; i > 0;)
+                            {
+                                if (column[i] == column[i - 1])
+                                {
+                                    column[i] = column[i] + column[i - 1];
+                                    if (perform) score = score + column[i];
+                                    column[i - 1] = 0;
+                                    i = i - 2;
+                                }
+                                else
+                                {
+                                    i = i - 1;
+                                }
+                            }
+                        }
+
+                    }
+                    column = AuxMethods.RemoveZeroes(column);
+
+                    //Fill the rest of column with zeroes
+                    int emptySpaces = dimX - column.Count;
+                    if (dir == Direction.Up)
+                    {
+                        for (int i = 0; i < emptySpaces; i++) column.Add(0);
+
+                    }
+                    else
+                    {
+                        for (int i = 0; i < emptySpaces; i++) column.Insert(0, 0);
+                    }
+
+                    //Load shifted column into gameBoardCopy
+                    for (int i = 0; i < column.Count; i++)
+                    {
+                        gameBoardCopy[i, colNumber] = column[i];
+                    }
+
+
+                }
+            }
+            else
+            {
+                for (int rowNumber = 0; rowNumber < dimX; rowNumber++)
+                {
+                    List<int> row = new List<int>();
+                    for (int colNumber = 0; colNumber < dimY; colNumber++)
+                    {
+                        row.Add(gameBoardCopy[rowNumber, colNumber]);
+                    }
+
+                    row = AuxMethods.RemoveZeroes(row);
+                    if (row.Count > 1)
+                    {
+                        if (dir == Direction.Left)
+                        {
+                            for (int i = 0; i < row.Count - 1;)
+                            {
+                                if (row[i] == row[i + 1])
+                                {
+                                    row[i] = row[i] + row[i + 1];
+                                    if (perform) score = score + row[i];
+
+                                    row[i + 1] = 0;
+                                    i = i + 2;
+                                }
+                                else
+                                {
+                                    i = i + 1;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int i = row.Count - 1; i > 0;)
+                            {
+                                if (row[i] == row[i - 1])
+                                {
+                                    row[i] = row[i] + row[i - 1];
+                                    if (perform) score = score + row[i];
+
+                                    row[i - 1] = 0;
+                                    i = i - 2;
+                                }
+                                else
+                                {
+                                    i = i - 1;
+                                }
+                            }
+                        }
+
+                    }
+                    row = AuxMethods.RemoveZeroes(row);
+
+                    int emptySpaces = dimY - row.Count;
+                    if (dir == Direction.Left)
+                    {
+                        for (int i = 0; i < emptySpaces; i++) row.Add(0);
+
+                    }
+                    else
+                    {
+                        for (int i = 0; i < emptySpaces; i++) row.Insert(0, 0);
+                    }
+
+                    for (int i = 0; i < row.Count; i++)
+                    {
+                        gameBoardCopy[rowNumber, i] = row[i];
+                    }
+                }
+            }
+
+            //Check whether we moved a tile
+            bool isSame = true;
+            for (int i = 0; i < dimX; i++)
+            {
+                for (int j = 0; j < dimY; j++)
+                {
+                    if (gameBoard[i, j] != gameBoardCopy[i, j])
+                    {
+                        isSame = false;
+                    }
+                }
+            }
+
+            //Save the move
+            if (perform)
+            {
+                previousGameBoard = gameBoard;
+                gameBoard = gameBoardCopy;
+
+                CheckForWin();
+                CheckForLose();
+
+                if (!isLost && !isSame) GenerateTiles(spawnCount);
+            }
+
+            return !isSame;
         }
     }
 }

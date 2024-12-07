@@ -1,0 +1,225 @@
+﻿@page "/extended"
+@using System.Text
+<PageTitle>2048 Extended</PageTitle>
+<link rel="stylesheet" href="styles.css" />
+<h1>2048 Extended</h1>
+<div class="scoreBoard">Score: @(extendedGame == null ? "0" : extendedGame.score)</div>
+<div class="animationWrapper">
+    @if (extendedGame != null)
+    {
+        <div class="gameBoardWrapper" id="newExtended">
+            @for (int i = 0; i < extendedGame.gameBoard.GetLength(0); i++)
+            {
+                <div class="lineWrapper">
+                    @for (int j = 0; j < extendedGame.gameBoard.GetLength(1); j++)
+                    {
+                        <div class="cell @("c" + (extendedGame.gameBoard[i, j] > 2048 ? "other" : extendedGame.gameBoard[i, j]))">
+                            @if (extendedGame.gameBoard[i, j] > 0)
+                            {
+                                @extendedGame.gameBoard[i, j]
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="gameBoardWrapper" id="oldExtended">
+            @if (extendedGame.previousGameBoard != null)
+            {
+                @for (int i = 0; i < extendedGame.previousGameBoard.GetLength(0); i++)
+                {
+                    <div class="lineWrapper">
+                        @for (int j = 0; j < extendedGame.previousGameBoard.GetLength(1); j++)
+                        {
+                            <div class="cell @("c" + (extendedGame.previousGameBoard[i, j] > 2048 ? "other" : extendedGame.previousGameBoard[i, j]))">
+                                @if (extendedGame.previousGameBoard[i, j] > 0)
+                                {
+                                    @extendedGame.previousGameBoard[i, j]
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>
+<div class="buttonWrapper">
+    <button @onclick="Init" class="startButton">Restart</button>
+    <div>
+        Row count: <select @bind="dimX">
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+            <option>7</option>
+        </select>
+    </div>
+    <div>
+        Column count: <select @bind="dimY">
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+            <option>7</option>
+        </select>
+    </div>
+    <div>
+        Spawn count: <select @bind="spawnCount">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+        </select>
+    </div>
+    <button class="fileButton" @onclick="Save">Save game</button>
+    <label class="fileButton">
+        <InputFile class="fileButton" accept=".txt" OnChange="Load" />
+        Load game
+    </label>
+</div>
+
+@code
+{
+
+    public static Action updateMethod;
+    public static ExtendedGame extendedGame;
+    public static IJSRuntime JS;
+    public static NavigationManager NM;
+
+    public string dimX = "7";
+    public string dimY = "7";
+    public static string spawnCount = "1";
+
+    [JSInvokable]
+    public static void LeftExt()
+    {
+
+        if (extendedGame != null && NM.Uri.EndsWith("/extended"))
+        {
+            extendedGame.Move(Direction.Left, true);
+            updateMethod();
+            Check();
+        }
+    }
+
+    [JSInvokable]
+    public static void RightExt()
+    {
+        if (extendedGame != null && NM.Uri.EndsWith("/extended"))
+        {
+            extendedGame.Move(Direction.Right, true);
+            updateMethod();
+            Check();
+        }
+    }
+
+    [JSInvokable]
+    public static void UpExt()
+    {
+        if (extendedGame != null && NM.Uri.EndsWith("/extended"))
+        {
+            extendedGame.Move(Direction.Up, true);
+            updateMethod();
+            Check();
+        }
+    }
+
+    [JSInvokable]
+    public static void DownExt()
+    {
+        if (extendedGame != null && NM.Uri.EndsWith("/extended"))
+        {
+            extendedGame.Move(Direction.Down, true);
+            updateMethod();
+            Check();
+        }
+
+    }
+
+    public void Init()
+    {
+        extendedGame = new ExtendedGame(int.Parse(dimX), int.Parse(dimY), int.Parse(spawnCount));
+        updateMethod();
+    }
+
+    public static void Check()
+    {
+        if (extendedGame.isLost)
+        {
+            JS.InvokeVoidAsync("alert", "You lost!");
+        }
+
+        if (extendedGame.isWon)
+        {
+            JS.InvokeVoidAsync("alert", "You won!");
+        }
+
+        JS.InvokeVoidAsync("AnimateExtended");
+        AuxMethods.StoreString(JS, "ext", extendedGame.ToString());
+    }
+
+    public async void Save()
+    {
+        if (extendedGame != null)
+        {
+            string text = extendedGame.ToString();
+            string filename = "2048EXT_" + DateTime.Now.ToString("ddMMhhmmss") + ".txt";
+
+            AuxMethods.Download(JS, filename, text);
+        }
+    }
+
+    public async void Load(InputFileChangeEventArgs e)
+    {
+        string content = await AuxMethods.Upload(e.File);
+
+        ExtendedGame eg = new ExtendedGame(content);
+        if (eg.score >= 0)
+        {
+            extendedGame = eg;
+            updateMethod();
+        }
+        else
+        {
+            JS.InvokeVoidAsync("alert", "Load file error.");
+        }
+    }
+
+    //Call from JS to C#
+    private IJSObjectReference? module;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            updateMethod = StateHasChanged;
+            JS = JScript;
+            NM = navMan;
+
+            module = await JS.InvokeAsync<IJSObjectReference>("import",
+                "/~chabadat/wwwroot/script.js");
+
+            /*
+            module = await JS.InvokeAsync<IJSObjectReference>("import",
+                "/script.js");
+            */
+            await module.InvokeVoidAsync("AddHandlers2");
+
+            ExtendedGame eg = new ExtendedGame(await AuxMethods.LoadString(JS, "ext"));
+            if (eg.score >= 0)
+            {
+                extendedGame = eg;
+            }
+            else
+            {
+                Init();
+            }
+
+            updateMethod();
+        }
+    }
+
+
+}

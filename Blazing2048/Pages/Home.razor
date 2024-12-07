@@ -1,7 +1,194 @@
 ﻿@page "/"
+<PageTitle>2048 Standard</PageTitle>
+<link rel="stylesheet" href="styles.css" />
+<h1>2048 Standard</h1>
+<div class="scoreBoard">Score: @(standardGame == null ? "0" : standardGame.score)</div>
+<div class="animationWrapper">
+    @if (standardGame != null)
+    {
+        <div class="gameBoardWrapper" id="newStandard">
+            @for (int i = 0; i < standardGame.gameBoard.GetLength(0); i++)
+            {
+                <div class="lineWrapper">
+                    @for (int j = 0; j < standardGame.gameBoard.GetLength(1); j++)
+                    {
+                        <div class="cell @("c" + (standardGame.gameBoard[i, j] > 2048 ? "other" : standardGame.gameBoard[i, j]))">
+                            @if (standardGame.gameBoard[i, j] > 0)
+                            {
+                                @standardGame.gameBoard[i, j]
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
 
-<PageTitle>Home</PageTitle>
+        <div class="gameBoardWrapper" id="oldStandard">
+            @if (standardGame.previousGameBoard != null)
+            {
+                @for (int i = 0; i < standardGame.previousGameBoard.GetLength(0); i++)
+                {
+                    <div class="lineWrapper">
+                        @for (int j = 0; j < standardGame.previousGameBoard.GetLength(1); j++)
+                        {
+                            <div class="cell @("c" + (standardGame.previousGameBoard[i, j] > 2048 ? "other" : standardGame.previousGameBoard[i, j]))">
+                                @if (standardGame.previousGameBoard[i, j] > 0)
+                                {
+                                    @standardGame.previousGameBoard[i, j]
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            }
 
-<h1>Hello, world!</h1>
+        </div>
+    }
+</div>
+<div class="buttonWrapper">
+    <button @onclick="Init" class="startButton">Restart</button>
+    <button @onclick="Save" class="fileButton">Save game</button>
+    <label class="fileButton">
+        <InputFile class="fileButton" accept=".txt" OnChange="Load" />
+        Load game
+    </label>
+</div>
 
-Welcome to your new app.
+@code
+{
+
+    public static Action updateMethod;
+    public static StandardGame standardGame;
+    public static IJSRuntime JS;
+    public static NavigationManager NM;
+
+    [JSInvokable]
+    public static void Left()
+    {
+        if (standardGame != null && NM.Uri.EndsWith("/"))
+        {
+            standardGame.Move(Direction.Left, true);
+            updateMethod();
+            Check();
+        }
+    }
+
+    [JSInvokable]
+    public static void Right()
+    {
+        if (standardGame != null && NM.Uri.EndsWith("/"))
+        {
+            standardGame.Move(Direction.Right, true);
+            updateMethod();
+            Check();
+        }
+    }
+
+    [JSInvokable]
+    public static void Up()
+    {
+        if (standardGame != null && NM.Uri.EndsWith("/"))
+        {
+            standardGame.Move(Direction.Up, true);
+            updateMethod();
+            Check();
+        }
+    }
+
+    [JSInvokable]
+    public static void Down()
+    {
+        if (standardGame != null && NM.Uri.EndsWith("/"))
+        {
+            standardGame.Move(Direction.Down, true);
+            updateMethod();
+            Check();
+        }
+
+    }
+
+    public void Init()
+    {
+        standardGame = new StandardGame();
+        updateMethod();
+    }
+
+    public static void Check()
+    {
+        if (standardGame.isLost)
+        {
+            JS.InvokeVoidAsync("alert", "You lost!");
+        }
+
+        if (standardGame.isWon)
+        {
+            JS.InvokeVoidAsync("alert", "You won!");
+        }
+
+        JS.InvokeVoidAsync("AnimateStandard");
+        AuxMethods.StoreString(JS, "std", standardGame.ToString());
+    }
+    public void Save()
+    {
+        if (standardGame != null)
+        {
+            string text = standardGame.ToString();
+            string filename = "2048STD_" + DateTime.Now.ToString("ddMMhhmmss") + ".txt";
+
+            AuxMethods.Download(JS, filename, text);
+        }
+    }
+
+    public async void Load(InputFileChangeEventArgs e)
+    {
+        string content = await AuxMethods.Upload(e.File);
+
+        StandardGame sg = new StandardGame(content);
+        if (sg.score >= 0)
+        {
+            standardGame = sg;
+            updateMethod();
+        }
+        else
+        {
+            JS.InvokeVoidAsync("alert", "Load file error.");
+        }
+    }
+
+    //Call from JS to C#
+    private IJSObjectReference? module;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            updateMethod = StateHasChanged;
+            JS = JScript;
+            NM = navMan;
+
+
+
+            module = await JS.InvokeAsync<IJSObjectReference>("import",
+                "/~chabadat/wwwroot/script.js");
+
+            /*
+            module = await JS.InvokeAsync<IJSObjectReference>("import",
+                "/script.js");
+            */
+            await module.InvokeVoidAsync("AddHandlers");
+
+            StandardGame sg = new StandardGame(await AuxMethods.LoadString(JS, "std"));
+            if (sg.score >= 0)
+            {
+                standardGame = sg;
+            }
+            else
+            {
+                Init();
+            }
+
+            updateMethod();
+        }
+    }
+
+
+}

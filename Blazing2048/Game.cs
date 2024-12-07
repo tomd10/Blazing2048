@@ -260,5 +260,16 @@
 
             return !isSame;
         }
+
+        public override string ToString()
+        {
+            //2048#dimX#dimY#spawnCount#winFlag#score#arr1,arr2,....
+            string s = "2048#" + dimX.ToString() + "#" + dimY.ToString() + "#" + spawnCount.ToString() + "#" + wonFlag.ToString() + "#" + score.ToString() + "#";
+            foreach (int i in gameBoard)
+            {
+                s = s + i.ToString() + ",";
+            }
+            return s.Substring(0, s.Length - 1);
+        }
     }
 }

@@ -166,14 +166,14 @@
             NM = navMan;
 
 
-
-            module = await JS.InvokeAsync<IJSObjectReference>("import",
-                "/~chabadat/wwwroot/script.js");
-
             /*
             module = await JS.InvokeAsync<IJSObjectReference>("import",
+                "/~chabadat/wwwroot/script.js");
+                */
+            
+            module = await JS.InvokeAsync<IJSObjectReference>("import",
                 "/script.js");
-            */
+            
             await module.InvokeVoidAsync("AddHandlers");
 
             StandardGame sg = new StandardGame(await AuxMethods.LoadString(JS, "std"));

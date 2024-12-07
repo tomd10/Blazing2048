@@ -198,13 +198,14 @@
             JS = JScript;
             NM = navMan;
 
-            module = await JS.InvokeAsync<IJSObjectReference>("import",
-                "/~chabadat/wwwroot/script.js");
-
             /*
             module = await JS.InvokeAsync<IJSObjectReference>("import",
+                "/~chabadat/wwwroot/script.js");
+                */
+            
+            module = await JS.InvokeAsync<IJSObjectReference>("import",
                 "/script.js");
-            */
+            
             await module.InvokeVoidAsync("AddHandlers2");
 
             ExtendedGame eg = new ExtendedGame(await AuxMethods.LoadString(JS, "ext"));

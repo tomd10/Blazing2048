@@ -26,19 +26,19 @@ window.AnimateExtended = () => {
     element.classList.add("animation");
 }
 export function PressedLeft() {
-    DotNet.invokeMethodAsync('Blazor2048Test', 'Left');
+    DotNet.invokeMethodAsync('Blazing2048', 'Left');
 }
 
 export function PressedRight() {
-    DotNet.invokeMethodAsync('Blazor2048Test', 'Right');
+    DotNet.invokeMethodAsync('Blazing2048', 'Right');
 }
 
 export function PressedUp() {
-    DotNet.invokeMethodAsync('Blazor2048Test', 'Up');
+    DotNet.invokeMethodAsync('Blazing2048', 'Up');
 }
 
 export function PressedDown() {
-    DotNet.invokeMethodAsync('Blazor2048Test', 'Down');
+    DotNet.invokeMethodAsync('Blazing2048', 'Down');
 }
 
 export function AddHandlers() {
@@ -61,19 +61,19 @@ export function KeyPressed(e) {
 }
 
 export function PressedLeft2() {
-    DotNet.invokeMethodAsync('Blazor2048Test', 'LeftExt');
+    DotNet.invokeMethodAsync('Blazing2048', 'LeftExt');
 }
 
 export function PressedRight2() {
-    DotNet.invokeMethodAsync('Blazor2048Test', 'RightExt');
+    DotNet.invokeMethodAsync('Blazing2048', 'RightExt');
 }
 
 export function PressedUp2() {
-    DotNet.invokeMethodAsync('Blazor2048Test', 'UpExt');
+    DotNet.invokeMethodAsync('Blazing2048', 'UpExt');
 }
 
 export function PressedDown2() {
-    DotNet.invokeMethodAsync('Blazor2048Test', 'DownExt');
+    DotNet.invokeMethodAsync('Blazing2048', 'DownExt');
 }
 
 export function AddHandlers2() {

@@ -28,6 +28,13 @@
             //2048#dimX#dimY#spawnCount#winFlag#score#arr1,arr2,....
             try
             {
+                //Checksum control
+                string checksum = s.Substring(s.Length - 4);
+                string computedChecksum = AuxMethods.GetChecksum(s.Substring(0, s.Length - 4));
+
+                if (checksum != computedChecksum) throw new Exception(); 
+
+                //Parsing
                 string[] words = s.Split('#');
                 dimX = int.Parse(words[1]);
                 dimY = int.Parse(words[2]);

@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
+using System.Runtime.Intrinsics.Arm;
+using System.Security.Cryptography;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace Blazing2048
 {
@@ -45,6 +48,18 @@ namespace Blazing2048
         {
             return await JS.InvokeAsync<string>("localStorage.getItem", key);
 
+        }
+
+        public static string GetChecksum(string data)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(data);
+            short checksum = 0;
+            foreach (byte b in bytes)
+            {
+                checksum += (byte)b;
+            }
+
+            return checksum.ToString("X4");
         }
     }
 }

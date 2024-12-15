@@ -110,6 +110,7 @@
     public void Init()
     {
         standardGame = new StandardGame();
+        AuxMethods.StoreString(JS, "std", standardGame.ToString());
         updateMethod();
     }
 
@@ -161,6 +162,8 @@
     {
         if (firstRender)
         {
+            //Console.WriteLine(AuxMethods.GetChecksum("2048#4#4#1#False#20#16,32,16,32,32,16,32,16,16,32,16,32,32,16,128,128#"));
+            //Console.WriteLine(AuxMethods.GetChecksum("2048#4#4#1#False#20#0,0,0,0,0,0,0,0,0,0,0,0,0,0,1024,1024#"));
             updateMethod = StateHasChanged;
             JS = JScript;
             NM = navMan;

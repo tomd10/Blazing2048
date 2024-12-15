@@ -74,11 +74,11 @@
             return false;
         }
 
-        public bool CheckForLose()
+        public void CheckForLose()
         {
-            return !Move(Direction.Left, false) && !Move(Direction.Right, false)
+            Console.WriteLine(Move(Direction.Left, false) + " " + Move(Direction.Right, false) + " " + Move(Direction.Up, false) + " " + Move(Direction.Down, false));
+            isLost = !Move(Direction.Left, false) && !Move(Direction.Right, false)
                 && !Move(Direction.Up, false) && !Move(Direction.Down, false);
-            ;
         }
         public bool Move(Direction dir, bool perform)
         {
@@ -269,7 +269,10 @@
             {
                 s = s + i.ToString() + ",";
             }
-            return s.Substring(0, s.Length - 1);
+            s = s.Substring(0, s.Length - 1) + "#";
+            s = s + AuxMethods.GetChecksum(s);
+
+            return s;
         }
     }
 }

@@ -142,6 +142,7 @@
     public void Init()
     {
         extendedGame = new ExtendedGame(int.Parse(dimX), int.Parse(dimY), int.Parse(spawnCount));
+        AuxMethods.StoreString(JS, "ext", extendedGame.ToString());
         updateMethod();
     }
 

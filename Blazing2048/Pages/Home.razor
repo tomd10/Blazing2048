@@ -162,21 +162,19 @@
     {
         if (firstRender)
         {
-            //Console.WriteLine(AuxMethods.GetChecksum("2048#4#4#1#False#20#16,32,16,32,32,16,32,16,16,32,16,32,32,16,128,128#"));
-            //Console.WriteLine(AuxMethods.GetChecksum("2048#4#4#1#False#20#0,0,0,0,0,0,0,0,0,0,0,0,0,0,1024,1024#"));
             updateMethod = StateHasChanged;
             JS = JScript;
             NM = navMan;
 
 
-            /*
+            
             module = await JS.InvokeAsync<IJSObjectReference>("import",
                 "/~chabadat/wwwroot/script.js");
-                */
-            
+                
+            /*
             module = await JS.InvokeAsync<IJSObjectReference>("import",
                 "/script.js");
-            
+            */
             await module.InvokeVoidAsync("AddHandlers");
 
             StandardGame sg = new StandardGame(await AuxMethods.LoadString(JS, "std"));

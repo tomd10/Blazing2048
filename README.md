@@ -95,3 +95,8 @@ Aplikace je zkompilována do WASM (WebAssembly), proto se po spuštění dlouho 
 *   Předefinování metod následníkem (override)
 *   Statická třída se statickými metodami (oddělení, zpřehlednění aplikace)
 *   Asynchronní metody (zejm. pro interoperabilitu C# a JavaScriptu)
+
+### Zkušební soubory
+2048#4#4#1#False#20#0,0,0,0,0,0,0,0,0,0,0,0,0,0,1024,1024#0B6B
+2048#4#4#1#False#20#16,32,16,32,32,16,32,16,16,32,16,32,32,16,128,128#0E07
+2048#4#4#1#False#20#0,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768#105D
